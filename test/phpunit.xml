@@ -1,0 +1,17 @@
+<phpunit bootstrap="./bootstrap.php" colors="true">
+    <testsuite name="Constant Contact PHP Library Test Suite">
+        <directory>./</directory>
+    </testsuite>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../src/</directory>
+            <exclude>
+                <!-- Simple cURL implementation to aid unit testing -->
+                <file>../src/Ctct/CurlRequest.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-clover" target="./clover.xml" />
+    </logging>
+</phpunit>

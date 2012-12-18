@@ -1,0 +1,14 @@
+language: php
+
+php:
+  - 5.2
+  - 5.3
+  - 5.4
+
+before_install:
+ - wget -q http://cs.sensiolabs.org/get/php-cs-fixer.phar
+
+script:
+ - phpunit -c test/phpunit.xml
+ - ./test/coverage-checker test/clover.xml 100
+ - ./test/cs-checker
