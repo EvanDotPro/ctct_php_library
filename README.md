@@ -2,6 +2,8 @@
 
 Version 0.0.1 by Evan Coury
 
+[![Build Status](https://travis-ci.org/EvanDotPro/ctct_php_library.png)](https://travis-ci.org/EvanDotPro/ctct_php_library)
+
 ## Introduction
 
 This is a complete re-write of the Constant Contact PHP API library.
@@ -10,7 +12,7 @@ This is a complete re-write of the Constant Contact PHP API library.
 
 0. PHP 5.1.3+ w/ cURL
 1. A valid Constant Contact account. You can register for a free trial with no credit card at [http://www.constantcontact.com/](http://www.constantcontact.com/).
-2. A valid API Key for your Constant Contact account, obtained from [http://developer.constantcontact.com/](http://developer.constantcontact.com/)
+2. A valid API Key for your Constant Contact account, obtained from [http://developer.constantcontact.com/](http://developer.constantcontact.com/).
 
 ## Improvements over the old PHP library
 
@@ -35,9 +37,9 @@ If you haven't already, you can register your client application for OAuth / API
 <?php
 require_once 'ctct_php_library/init_autoloader.php';
 
-$consumerKey    = 'YOURCONSUMERKEY';             // Referred to by Constant Contact as "client_id" or "API key"
-$consumerSecret = 'YOURCONSUMERSECRET';          // Referred to by Constant Contact as "client secret"
-$returnUrl      = 'https://yoururl/returnurl';   // Must match the URL you registered with Constant Contact
+$consumerKey    = 'YOURCONSUMERKEY';           // Referred to by Constant Contact as "client_id" or "API key"
+$consumerSecret = 'YOURCONSUMERSECRET';        // Referred to by Constant Contact as "client secret"
+$returnUrl      = 'https://yoururl/returnurl'; // Must match the URL you registered with Constant Contact
 
 $client = new Ctct_ApiClient($consumerKey, $consumerSecret);
 
