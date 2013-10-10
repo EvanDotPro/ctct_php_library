@@ -6,6 +6,8 @@ class Ctct_ApiClient
 
     const ACCESS_TOKEN_URL = 'https://oauth2.constantcontact.com/oauth2/oauth/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s';
 
+    const TOKEN_INFO_URL = 'https://oauth2.constantcontact.com/oauth2/tokeninfo.htm?access_token=%s';
+
     /**
      * @var string
      */
@@ -17,9 +19,29 @@ class Ctct_ApiClient
     protected $_consumerSecret;
 
     /**
+     * @var string
+     */
+    protected $_accessToken;
+
+    /**
+     * @var string
+     */
+    protected $_username;
+
+    /**
      * @var Ctct_HttpRequest
      */
     protected $_httpRequest;
+
+    /**
+     * @var Ctct_ListIterator
+     */
+    protected $_lists;
+
+    /**
+     * @var Ctct_ContactIterator
+     */
+    protected $_contacts;
 
     /**
      * Consturctor
@@ -31,6 +53,70 @@ class Ctct_ApiClient
     {
         $this->_consumerKey    = $consumerKey;
         $this->_consumerSecret = $consumerSecret;
+    }
+
+    /**
+     * Get the consumer key
+     *
+     * @return string
+     */
+    public function getConsumerKey()
+    {
+        return $this->_consumerKey;
+    }
+
+    /**
+     * Get the consumer secret
+     *
+     * @return string
+     */
+    public function getConsumerSecret()
+    {
+        return $this->_consumerSecret;
+    }
+
+    /**
+     * Set the OAuth access token
+     *
+     * @param string $accessToken
+     *
+     * @return Ctct_ApiClient
+     */
+    public function setAccessToken($accessToken)
+    {
+        $this->_accessToken = $accessToken;
+
+        return $this;
+    }
+
+    /**
+     * Get the OAuth access token
+     *
+     * @return string
+     */
+    public function getAccessToken()
+    {
+        return $this->_accessToken;
+    }
+
+    /**
+     * Verify the code returned by the client is valid and exchange it for an
+     * access token.
+     *
+     * @param string $code
+     * @param string $returnUrl
+     *
+     * @return string
+     */
+    public function fetchAccessToken($code, $returnUrl)
+    {
+        $url         = sprintf(self::ACCESS_TOKEN_URL, $this->_consumerKey, $this->_consumerSecret, $code, $returnUrl);
+        $result      = $this->_postRequestJson($url);
+        $accessToken = $result['access_token'];
+
+        $this->setAccessToken($accessToken);
+        // expires_in and token_type also available but not really used by Constant Contact
+        return $accessToken;
     }
 
     /**
@@ -76,18 +162,60 @@ class Ctct_ApiClient
     }
 
     /**
-     * Verify the code returned by the client is valid and exchange it for an
-     * access token.
-     *
-     * @param string $code
-     * @param string $returnUrl
+     * Get the username for a given access token.
      *
      * @return string
      */
-    public function getAccessToken($code, $returnUrl)
+    public function getUsername()
     {
-        $url = sprintf(self::ACCESS_TOKEN_URL, $this->_consumerKey, $this->_consumerSecret, $code, $returnUrl);
+        if (!$this->_username) {
+            $url             = sprintf(self::TOKEN_INFO_URL, $this->_accessToken);
+            $response        = $this->_postRequestJson($url);
+            $this->_username = $response['user_name'];
+        }
 
+        return $this->_username;
+    }
+
+    /**
+     * Return an iterator of contact lists
+     *
+     * @return Ctct_ListIterator
+     */
+    public function getLists()
+    {
+        if (!$this->_lists) {
+            $this->_lists = new Ctct_ListIterator($this);
+        }
+
+        return $this->_lists;
+    }
+
+    /**
+     * Return an iterator of contact
+     *
+     * @return Ctct_ContactIterator
+     */
+    public function getContacts()
+    {
+        if (!$this->_contacts) {
+            $this->_contacts = new Ctct_ContactIterator($this);
+        }
+
+        return $this->_contacts;
+    }
+
+    /**
+     * Perform a POST request to a Ctct URL.
+     *
+     * All of Ctct's examples use GET parameters and a bogus POST value, so we do the same here...
+     *
+     * @param string $url
+     *
+     * @return array
+     */
+    protected function _postRequestJson($url)
+    {
         $request = $this->getHttpRequest($url);
         $request->setOption(CURLOPT_URL, $url);
         $request->setOption(CURLOPT_HEADER, 0);
@@ -116,7 +244,6 @@ class Ctct_ApiClient
             throw new Ctct_Exception($result['error'] . ': ' . $result['error_description']);
         }
 
-        // expires_in and token_type also available but not used by Constant Contact
-        return $result['access_token'];
+        return $result;
     }
 }
